@@ -11,7 +11,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "preview:cf": "pnpm build && npx wrangler pages dev dist --r2 R2_BUCKET=base"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.98",
