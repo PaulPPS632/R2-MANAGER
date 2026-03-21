@@ -1,9 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@nuxt/ui'],
-  ssr: true,
+  // ssr: true,
   nitro: {
-    preset: 'cloudflare-pages', // <--- AÑADE ESTO
+    // preset: 'cloudflare-pages', // <--- AÑADE ESTO
     prerender: {
       autoSubfolderIndex: false
     }
@@ -22,7 +22,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   routeRules: {
-    // '/': { prerender: true }
+    '/': { prerender: true }
   },
 
   compatibilityDate: '2025-01-15',
