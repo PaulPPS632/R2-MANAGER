@@ -1,0 +1,14 @@
+name = "r2-manager"
+main = ".output/server/index.mjs"
+compatibility_date = "2026-03-21"
+workers_dev = true
+
+# Optional server variables for fallback S3 API mode
+[vars]
+R2_BUCKET_NAME = "base"
+
+# Bind your R2 bucket for Workers mode
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "base"
+preview_bucket_name = "base"
