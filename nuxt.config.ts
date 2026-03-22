@@ -6,6 +6,12 @@ export default defineNuxtConfig({
     // preset: 'cloudflare-pages', // <--- AÑADE ESTO
     prerender: {
       autoSubfolderIndex: false
+    },
+    devProxy: {
+      '/api-remote': {
+        target: 'https://r2-manager.paulyeffertperezsanjinez.workers.dev',
+        changeOrigin: true,
+      }
     }
   },
   runtimeConfig: {
@@ -14,7 +20,7 @@ export default defineNuxtConfig({
     r2SecretAccessKey: '',
     r2BucketName: '',
     public:{
-      apiBase: process.env.API_BASE || 'https://r2-manager.paulyeffertperezsanjinez.workers.dev'
+      apiBase: process.env.API_BASE || '/api-remote'
     }
   },
 

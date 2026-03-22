@@ -10,6 +10,7 @@ type ObjectItem = {
   size: number
   etag: string
   uploadedAt: string
+  contentType: string
 }
 
 type ListResponse = {
@@ -86,6 +87,15 @@ const goUp = async () => {
   await loadList(parent)
 }
 
+const isModalOpen = ref(false)
+const selectedObject = ref(null as ObjectItem | null)
+
+const handleViewObject = (data: any) => {
+  selectedObject.value = data
+  isModalOpen.value = true
+  console.log('Datos recibidos del componente hijo:', data)
+}
+
 onMounted(() => {
   loadList('')
 })
@@ -94,6 +104,7 @@ onMounted(() => {
 <template>
   <UContainer class="py-8 space-y-6">
     <div class="space-y-1">
+      <UIcon name="i-lucide-lightbulb" class="size-5" />
       <h1 class="text-2xl font-semibold">
         R2 Explorer
       </h1>
@@ -104,13 +115,9 @@ onMounted(() => {
 
     <UCard>
       <div class="flex flex-col gap-3 md:flex-row md:items-center">
-        <input
-          v-model="pathInput"
-          type="text"
-          placeholder="Path (ej: docs/imagenes)"
+        <input v-model="pathInput" type="text" placeholder="Path (ej: docs/imagenes)"
           class="w-full rounded-md border border-default bg-default px-3 py-2 text-sm outline-none ring-primary transition focus:ring-2"
-          @keyup.enter="loadList()"
-        >
+          @keyup.enter="loadList()">
 
         <div class="flex flex-wrap gap-2">
           <UButton icon="i-lucide-search" :loading="loading" @click="loadList()">
@@ -131,22 +138,12 @@ onMounted(() => {
         </p>
 
         <div class="flex gap-2">
-          <UButton
-            size="sm"
-            color="neutral"
-            :variant="viewMode === 'list' ? 'solid' : 'outline'"
-            icon="i-lucide-list"
-            @click="viewMode = 'list'"
-          >
+          <UButton size="sm" color="neutral" :variant="viewMode === 'list' ? 'solid' : 'outline'" icon="i-lucide-list"
+            @click="viewMode = 'list'">
             Lista
           </UButton>
-          <UButton
-            size="sm"
-            color="neutral"
-            :variant="viewMode === 'grid' ? 'solid' : 'outline'"
-            icon="i-lucide-layout-grid"
-            @click="viewMode = 'grid'"
-          >
+          <UButton size="sm" color="neutral" :variant="viewMode === 'grid' ? 'solid' : 'outline'"
+            icon="i-lucide-layout-grid" @click="viewMode = 'grid'">
             Grid
           </UButton>
         </div>
@@ -175,14 +172,8 @@ onMounted(() => {
         Sin carpetas
       </div>
       <div v-else class="flex flex-wrap gap-2">
-        <UButton
-          v-for="folder in folders"
-          :key="folder.path"
-          color="neutral"
-          variant="subtle"
-          icon="i-lucide-folder"
-          @click="openFolder(folder.path)"
-        >
+        <UButton v-for="folder in folders" :key="folder.path" color="neutral" variant="subtle" icon="i-lucide-folder"
+          @click="openFolder(folder.path)">
           {{ folder.name }}
         </UButton>
       </div>
@@ -211,11 +202,7 @@ onMounted(() => {
       </div>
 
       <div v-else-if="viewMode === 'list'" class="divide-y divide-default">
-        <div
-          v-for="item in objects"
-          :key="item.key"
-          class="grid grid-cols-12 gap-3 py-3 text-sm"
-        >
+        <div v-for="item in objects" :key="item.key" class="grid grid-cols-12 gap-3 py-3 text-sm">
           <div class="col-span-12 md:col-span-6 font-medium truncate" :title="item.key">
             {{ item.name }}
           </div>
@@ -229,27 +216,17 @@ onMounted(() => {
       </div>
 
       <div v-else class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <UCard
-          v-for="item in objects"
-          :key="item.key"
-          class="h-full"
-        >
-          <div class="space-y-2 text-sm">
-            <p class="font-medium truncate" :title="item.key">
-              {{ item.name }}
-            </p>
-            <p class="text-muted">
-              Tamaño: {{ formatBytes(item.size) }}
-            </p>
-            <p class="text-muted">
-              Subido: {{ formatDate(item.uploadedAt) }}
-            </p>
-            <p class="text-xs text-muted break-all">
-              {{ item.key }}
-            </p>
-          </div>
+        <UCard v-for="item in objects" :key="item.key" class="h-full">
+          <CardObject v-for="item in objects" :key="item.key" :name="item.name" :size="item.size"
+            :content-type="item.contentType" :key-path="item.key" :uploaded-at="item.uploadedAt"
+            @view="handleViewObject" />
         </UCard>
       </div>
     </UCard>
+    <UModal v-model="isModalOpen">
+      <UCard v-if="selectedObject">
+        <p>Viendo: {{ selectedObject.name }}</p>
+      </UCard>
+    </UModal>
   </UContainer>
 </template>
