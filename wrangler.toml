@@ -1,6 +1,7 @@
 name = "r2-manager"
 main = ".output/server/index.mjs"
 compatibility_date = "2026-03-21"
+compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
 # Optional server variables for fallback S3 API mode

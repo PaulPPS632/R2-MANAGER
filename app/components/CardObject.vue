@@ -1,58 +1,116 @@
 <script setup lang="ts">
-// Definimos lo que recibe el componente
 interface Props {
   name: string
   size?: number
-  contentType?: string // El mimetype que viene de R2
   keyPath: string
   uploadedAt?: string
 }
 
 const props = defineProps<Props>()
+const config = useRuntimeConfig()
 
-// Definimos el evento que enviaremos al padre al hacer clic
-const emit = defineEmits(['view'])
+const emit = defineEmits<{
+  view: []
+  delete: []
+}>()
 
-// Función para determinar el icono según el mimetype
-const getIcon = computed(() => {
-  const mime = props.contentType?.toLowerCase() || ''
-  
-  if (mime.startsWith('image/')) return 'i-heroicons-photo'
-  if (mime.startsWith('video/')) return 'i-heroicons-video-camera'
-  if (mime.startsWith('text/')) return 'i-heroicons-document-text'
-  if (mime === 'application/pdf') return 'i-heroicons-document-chart-bar'
-  if (mime.includes('zip') || mime.includes('rar')) return 'i-heroicons-archive-box'
-  
-  return 'i-heroicons-document' // Icono por defecto
+const extensionGroups = {
+    image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif', 'bmp', 'ico', 'tif', 'tiff'],
+    video: ['mp4', 'mkv', 'mov', 'avi', 'webm', 'm4v', 'flv'],
+    audio: ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'],
+    document: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp'],
+    code: ['js', 'ts', 'vue', 'json', 'html', 'css', 'scss', 'md', 'yml', 'yaml', 'xml', 'py', 'java', 'go', 'rs', 'sql'],
+    compressed: ['zip', 'rar', '7z', 'tar', 'gz', 'tgz', 'bz2', 'xz']
+}
+
+const extension = computed(() => {
+    const source = (props.name || props.keyPath || '').toLowerCase()
+    const parts = source.split('.')
+
+    if (parts.length < 2)
+        return ''
+
+    return parts.pop() || ''
 })
 
-// Función para formatear el tamaño (opcional pero recomendado)
+const getIcon = computed(() => {
+    const ext = extension.value
+
+    if (extensionGroups.image.includes(ext)) return 'i-lucide-image'
+    if (extensionGroups.video.includes(ext)) return 'i-lucide-film'
+    if (extensionGroups.audio.includes(ext)) return 'i-lucide-music'
+    if (extensionGroups.document.includes(ext)) return 'i-lucide-file-text'
+    if (extensionGroups.code.includes(ext)) return 'i-lucide-file-code-2'
+    if (extensionGroups.compressed.includes(ext)) return 'i-lucide-file-archive'
+
+    return 'i-lucide-file'
+})
+
+const isImage = computed(() => extensionGroups.image.includes(extension.value))
+
+// Thumbnail vía Cloudflare Image Resizing: 400×280, calidad 70, recorte cover
+const thumbnailUrl = computed(() => {
+  if (!isImage.value)
+    return ''
+
+  const base = String(config.public.r2PublicBaseUrl || 'https://r2.paulp.dev').replace(/\/$/, '')
+  const key = (props.keyPath || '').replace(/^\/+/, '')
+  return `${base}/cdn-cgi/image/width=400,height=280,quality=70,format=auto,fit=cover/${encodeURI(key)}`
+})
+
 const formatSize = (bytes?: number) => {
-  if (!bytes) return '0 B'
+    if (!bytes)
+        return '0 B'
+
   const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
 }
+
 </script>
 
 <template>
-    <UCard class="hover:ring-2 hover:ring-primary-500 cursor-pointer transition-all p-4"
-        @click="emit('view', props)">
-        <div class="flex items-center gap-3">
-            <p>ga</p>
-            <div class="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <UIcon :name="getIcon" class="w-8 h-8 text-primary-500" />
-            </div>
+  <UCard
+    class="group relative cursor-pointer overflow-hidden transition-all hover:ring-2 hover:ring-primary"
+    :ui="{ body: 'p-0' }"
+    @click="emit('view')"
+  >
+    <!-- Delete button overlay -->
+    <UButton
+      size="xs"
+      color="error"
+      variant="solid"
+      icon="i-lucide-trash-2"
+      class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+      @click.stop="emit('delete')"
+    />
+    <!-- Thumbnail para imágenes -->
+    <div v-if="isImage" class="h-36 w-full overflow-hidden bg-muted">
+      <img
+        :src="thumbnailUrl"
+        :alt="name"
+        class="h-full w-full object-cover transition-transform group-hover:scale-105"
+        loading="lazy"
+      >
+    </div>
 
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium truncate text-gray-900 dark:text-white">
-                    {{ name }}
-                </p>
-                <p class="text-xs text-gray-500">
-                    {{ formatSize(size) }}
-                </p>
-            </div>
-        </div>
-    </UCard>
+    <!-- Icono para no-imágenes -->
+    <div v-else class="flex h-36 w-full items-center justify-center bg-muted">
+      <UIcon :name="getIcon" class="h-12 w-12 text-muted" />
+    </div>
+
+    <!-- Info -->
+    <div class="flex items-center gap-2 p-3">
+      <UIcon :name="getIcon" class="h-4 w-4 shrink-0 text-muted" />
+      <div class="min-w-0 flex-1">
+        <p class="truncate text-sm font-medium">
+          {{ name }}
+        </p>
+        <p class="text-xs text-muted">
+          {{ formatSize(size) }}
+        </p>
+      </div>
+    </div>
+  </UCard>
 </template>

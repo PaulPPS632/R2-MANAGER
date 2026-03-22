@@ -20,7 +20,8 @@ export default defineNuxtConfig({
     r2SecretAccessKey: '',
     r2BucketName: '',
     public:{
-      apiBase: process.env.API_BASE || '/api-remote'
+      apiBase: process.env.API_BASE || '/api-remote',
+      r2PublicBaseUrl: process.env.R2_PUBLIC_BASE_URL || 'https://r2.paulp.dev'
     }
   },
 
