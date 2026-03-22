@@ -42,7 +42,6 @@ const uploading = ref(false)
 
 const toast = useToast()
 const apiBase = useRuntimeConfig().public.apiBase as string
-
 // ── helpers ───────────────────────────────────────────────────────────────
 const formatBytes = (bytes: number) => {
   const units = ['B', 'KB', 'MB', 'GB', 'TB']
