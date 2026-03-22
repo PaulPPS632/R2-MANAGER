@@ -15,10 +15,10 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    r2AccountId: '',
-    r2AccessKeyId: '',
-    r2SecretAccessKey: '',
-    r2BucketName: '',
+    r2AccountId:  process.env.R2_ACCOUNT_ID,
+    r2AccessKeyId: process.env.R2_ACCESS_KEY_ID,
+    r2SecretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    r2BucketName: process.env.R2_BUCKET_NAME,
     public:{
       apiBase: process.env.API_BASE || 'https://r2-manager.paulp.dev',
       r2PublicBaseUrl: process.env.R2_PUBLIC_BASE_URL || 'https://r2.paulp.dev'
