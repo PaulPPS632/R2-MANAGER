@@ -12,7 +12,10 @@ export default defineNuxtConfig({
     r2AccountId: '',
     r2AccessKeyId: '',
     r2SecretAccessKey: '',
-    r2BucketName: ''
+    r2BucketName: '',
+    public:{
+      apiBase: process.env.API_BASE || 'https://r2-manager.paulyeffertperezsanjinez.workers.dev'
+    }
   },
 
   devtools: {

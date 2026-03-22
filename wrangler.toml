@@ -12,3 +12,8 @@ R2_BUCKET_NAME = "base"
 binding = "R2_BUCKET"
 bucket_name = "base"
 preview_bucket_name = "base"
+
+
+[[routes]]
+pattern = "r2-manager.paulp.dev"
+custom_domain = true

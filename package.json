@@ -6,7 +6,7 @@
     "build": "nuxt build",
     "build:cf": "NITRO_PRESET=cloudflare_module nuxt build",
     "dev": "nuxt dev",
-    "dev:cf": "npm run build:cf && wrangler dev .output/server/index.mjs",
+    "dev:cf": "wrangler pages dev --pnpm --proxy 3000 --r2 R2_BUCKET=base",
     "deploy:cf": "npm run build:cf && wrangler deploy .output/server/index.mjs",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
