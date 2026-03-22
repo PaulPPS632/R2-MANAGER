@@ -204,13 +204,6 @@ onMounted(() => loadList(''))
 
 <template>
   <UContainer class="py-8 space-y-4">
-    <!-- Title -->
-    <div class="flex items-center gap-3">
-      <UIcon name="i-lucide-hard-drive" class="size-6 text-primary shrink-0" />
-      <h1 class="text-2xl font-semibold">
-        R2 Explorer
-      </h1>
-    </div>
 
     <!-- Toolbar -->
     <UCard :ui="{ body: 'p-3' }">

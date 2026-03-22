@@ -14,6 +14,7 @@ interface Props {
 const props = defineProps<Props>()
 const open = defineModel<boolean>('open', { default: false })
 const config = useRuntimeConfig()
+const toast = useToast()
 
 const getExtension = (value: string) => {
   const part = value.toLowerCase().split('.').pop()
@@ -85,6 +86,28 @@ const formatDate = (value?: string) => {
 
   return new Date(value).toLocaleString()
 }
+
+const copyObjectUrl = async () => {
+  if (!objectUrl.value)
+    return
+
+  try {
+    await navigator.clipboard.writeText(objectUrl.value)
+    toast.add({
+      title: 'URL copiada',
+      description: 'La URL pública del archivo se copió al portapapeles.',
+      icon: 'i-lucide-check'
+    })
+  }
+  catch {
+    toast.add({
+      title: 'No se pudo copiar',
+      description: 'Tu navegador bloqueó el acceso al portapapeles.',
+      icon: 'i-lucide-circle-alert',
+      color: 'error'
+    })
+  }
+}
 </script>
 
 <template>
@@ -136,6 +159,27 @@ const formatDate = (value?: string) => {
           <p class="text-right">
             Fecha: {{ formatDate(props.object.uploadedAt) }}
           </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <UButton
+            :to="objectUrl"
+            target="_blank"
+            icon="i-lucide-external-link"
+            color="neutral"
+            variant="outline"
+          >
+            Abrir URL
+          </UButton>
+
+          <UButton
+            icon="i-lucide-copy"
+            color="neutral"
+            variant="subtle"
+            @click="copyObjectUrl"
+          >
+            Copiar URL
+          </UButton>
         </div>
       </div>
     </template>

@@ -1,47 +1,128 @@
-# Nuxt Starter Template
+# R2 Manager
 
-[![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
+Gestor de archivos para **Cloudflare R2** construido con [Nuxt 4](https://nuxt.com) y [Nuxt UI](https://ui.nuxt.com). Permite explorar, subir, eliminar y organizar objetos y carpetas en un bucket R2, con soporte para previsualización de imágenes, videos y audio.
 
-Use this template to get started with [Nuxt UI](https://ui.nuxt.com) quickly.
+## Características
 
-- [Live demo](https://starter-template.nuxt.dev/)
-- [Documentation](https://ui.nuxt.com/docs/getting-started/installation/nuxt)
+- 📁 Navegación por carpetas con breadcrumbs
+- 🖼️ Miniaturas de imágenes mediante Cloudflare Image Resizing
+- ▶️ Previsualización de imágenes, videos y audio en modal
+- ⬆️ Subida de archivos mediante Presigned URL (PUT directo a R2)
+- 🗑️ Eliminación de objetos con confirmación
+- 📂 Creación de carpetas (usando archivo `.keep` como placeholder)
+- 🔀 Vista en grid o listado
+- 🌗 Modo claro / oscuro
 
-<a href="https://starter-template.nuxt.dev/" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png">
-    <img alt="Nuxt Starter Template" src="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png" width="830" height="466">
-  </picture>
-</a>
+## Stack
 
-> The starter template for Vue is on https://github.com/nuxt-ui-templates/starter-vue.
+- **Nuxt 4** + **Nitro** — framework y servidor
+- **Nuxt UI v4** + **Tailwind CSS v4** — interfaz
+- **Cloudflare Workers** + **R2** — runtime y almacenamiento
+- **Wrangler** — desarrollo y despliegue en Cloudflare
+- **AWS SDK v3** — generación de presigned URLs para subida
 
-## Quick Start
+---
 
-```bash [Terminal]
-npm create nuxt@latest -- -t ui
-```
+## Configuración
 
-## Deploy your own
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-name=starter&repository-url=https%3A%2F%2Fgithub.com%2Fnuxt-ui-templates%2Fstarter&demo-image=https%3A%2F%2Fui.nuxt.com%2Fassets%2Ftemplates%2Fnuxt%2Fstarter-dark.png&demo-url=https%3A%2F%2Fstarter-template.nuxt.dev%2F&demo-title=Nuxt%20Starter%20Template&demo-description=A%20minimal%20template%20to%20get%20started%20with%20Nuxt%20UI.)
-
-## Setup
-
-Make sure to install the dependencies:
+### 1. Instalar dependencias
 
 ```bash
 pnpm install
 ```
 
-## Development Server
+### 2. Variables de entorno / Secrets
 
-Start the development server on `http://localhost:3000`:
+El proyecto usa las siguientes variables. Nuxt las mapea automáticamente desde el entorno usando el prefijo `NUXT_`.
+
+| Variable Nuxt (`runtimeConfig`) | Variable de entorno / Secret |
+|---|---|
+| `r2AccountId` | `NUXT_R2_ACCOUNT_ID` |
+| `r2AccessKeyId` | `NUXT_R2_ACCESS_KEY_ID` |
+| `r2SecretAccessKey` | `NUXT_R2_SECRET_ACCESS_KEY` |
+| `r2BucketName` | `NUXT_R2_BUCKET_NAME` |
+
+> Estas credenciales se usan **únicamente** para generar Presigned URLs de subida (AWS SDK). El resto de operaciones usan el binding nativo de R2 en Cloudflare Workers.
+
+#### Para desarrollo local (`.env`)
+
+Crea un archivo `.env` en la raíz:
+
+```env
+NUXT_R2_ACCOUNT_ID=tu_account_id
+NUXT_R2_ACCESS_KEY_ID=tu_access_key_id
+NUXT_R2_SECRET_ACCESS_KEY=tu_secret_access_key
+NUXT_R2_BUCKET_NAME=base
+```
+
+#### Para producción en Cloudflare Workers
+
+Configura los secrets con Wrangler (solo se hace una vez):
+
+```bash
+wrangler secret put NUXT_R2_ACCOUNT_ID
+wrangler secret put NUXT_R2_ACCESS_KEY_ID
+wrangler secret put NUXT_R2_SECRET_ACCESS_KEY
+wrangler secret put NUXT_R2_BUCKET_NAME
+```
+
+### 3. Variables públicas (opcionales)
+
+Se pueden sobreescribir mediante variables de entorno:
+
+| Variable | Default | Descripción |
+|---|---|---|
+| `API_BASE` | `https://r2-manager.paulp.dev` | URL base de la API en producción |
+| `R2_PUBLIC_BASE_URL` | `https://r2.paulp.dev` | Dominio público del bucket R2 para servir archivos |
+
+---
+
+## Desarrollo
+
+### Modo Nuxt estándar (sin Workers)
 
 ```bash
 pnpm dev
 ```
+
+Levanta el servidor en `http://localhost:3000`. Las llamadas a `/api-remote` se proxean al Worker desplegado en Cloudflare.
+
+### Modo Cloudflare Workers (con Wrangler)
+
+```bash
+pnpm dev:cf
+```
+
+Requiere haber hecho `wrangler login` previamente. Simula el entorno de Cloudflare Workers con el binding R2 en local.
+
+---
+
+## Despliegue
+
+### Build para Cloudflare Workers
+
+```bash
+pnpm build:cf
+```
+
+### Desplegar en Cloudflare
+
+```bash
+pnpm deploy:cf
+```
+
+---
+
+## Endpoints API
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/api/r2/list` | Lista objetos y carpetas en un `path` dado |
+| `POST` | `/api/r2/presign` | Genera una Presigned URL para subir un archivo |
+| `POST` | `/api/r2/delete` | Elimina un objeto por `key` |
+| `POST` | `/api/r2/folder` | Crea una carpeta (archivo `.keep` como placeholder) |
+
+---
 
 ## Production
 
