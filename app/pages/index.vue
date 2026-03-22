@@ -51,7 +51,7 @@ const loadList = async (path = pathInput.value) => {
   errorMsg.value = ''
 
   try {
-    const data = await $fetch<ListResponse>('/api/r2/list', {
+    const data = await $fetch<ListResponse>(`${useRuntimeConfig().public.apiBase}/api/r2/list`, {
       method: 'POST',
       body: { path }
     })

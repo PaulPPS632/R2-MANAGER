@@ -9,6 +9,12 @@ const normalizePath = (input?: string) => {
 const getLastSegment = (value: string) => value.split('/').filter(Boolean).pop() || value
 
 export default defineEventHandler(async (event) => {
+  setResponseHeaders(event, {
+    'Access-Control-Allow-Origin': '*', // O 'http://localhost:3000'
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  })
+  if (event.method === 'OPTIONS') return 'OK'
   const body = await readBody<{ path?: string }>(event)
   const prefix = normalizePath(body?.path)
 
